@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Ember"
+description = "Aplicación web de Ember para gestionar gastos recurrentes, métodos de pago y fechas de cobro con cuentas personales."
+version = "1.0.0"
+id = "artifacts/ember-web"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22956
+
+[services.development]
+run = "pnpm --filter @workspace/ember-web run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ember-web", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ember-web/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22956"
+BASE_PATH = "/"

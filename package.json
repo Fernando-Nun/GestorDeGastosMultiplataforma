@@ -1,35 +1,19 @@
 {
-  "name": "figma-make-app",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
-    "dev": "tsx server/index.ts",
-    "build": "vite build",
-    "start": "NODE_ENV=production tsx server/index.ts",
-    "preview": "vite preview",
-    "format": "oxfmt"
+    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
+  "private": true,
   "dependencies": {
-    "express": "^5.2.1",
-    "framer-motion": "^13.4.2",
-    "pg": "^8.23.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.0",
-    "tsx": "^4.23.15"
+    "@replit/connectors-sdk": "^0.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/express": "^5.0.6",
-    "@types/node": "^22.0.0",
-    "@types/pg": "^8.23.1",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^6.0.0",
-    "oxfmt": "0.2.0",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
-    "vite": "8.0.5"
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
   }
 }

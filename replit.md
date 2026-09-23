@@ -1,26 +1,45 @@
-# Ember
+# [Project name]
 
-Ember is a React + Vite subscription expense tracker with a mobile-first liquid-glass interface.
+_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
 
-## Run
+## Run & Operate
 
-- `pnpm dev` starts the combined Express and Vite server on port 5000.
-- `pnpm run build` builds the client for production.
-- `pnpm start` serves the production build and API.
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm run typecheck` — full typecheck across all packages
+- `pnpm run build` — typecheck + build all packages
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- Required env: `DATABASE_URL` — Postgres connection string
 
-## Persistence
+## Stack
 
-The app uses Replit PostgreSQL for all application data:
+- pnpm workspaces, Node.js 24, TypeScript 5.9
+- API: Express 5
+- DB: PostgreSQL + Drizzle ORM
+- Validation: Zod (`zod/v4`), `drizzle-zod`
+- API codegen: Orval (from OpenAPI spec)
+- Build: esbuild (CJS bundle)
 
-- `app_users` stores accounts with scrypt password hashes.
-- `app_sessions` stores hashed, expiring HTTP-only session tokens.
-- `password_reset_tokens` stores one-hour recovery tokens for a future email delivery provider.
-- `expenses` stores each user's recurring payments.
+## Where things live
 
-The schema is versioned in `database-schema.sql` and has already been applied to the development database. The API in `server/index.ts` owns authentication and expense CRUD; the browser never receives database credentials.
+_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
 
-`DATABASE_URL` is provided by Replit. `SESSION_SECRET` should be managed through Replit Secrets and is used to sign session token hashes.
+## Architecture decisions
 
-## UI conventions
+_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
 
-Service branding is represented with inline SVG icons only. Do not add emoji characters to the interface.
+## Product
+
+_Describe the high-level user-facing capabilities of this app once they exist._
+
+## User preferences
+
+_Populate as you build — explicit user instructions worth remembering across sessions._
+
+## Gotchas
+
+_Populate as you build — sharp edges, "always run X before Y" rules._
+
+## Pointers
+
+- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details

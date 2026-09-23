@@ -1,0 +1,10 @@
+{
+  "description": "Manage and track recurring expenses with customizable reminders, currency conversion, and intuitive dashboards to stay on top of your payments effortlessly.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
