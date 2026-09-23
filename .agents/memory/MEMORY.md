@@ -1,1 +1,2 @@
 - [Ember API migration compatibility](ember-api-compatibility.md) — preserve the existing cookie-based client behavior when changing API integration.
+- [Expo workspace quirks](expo-workspace-quirks.md) — mobile Expo artifact uses a non-root preview path; this template rejects app.json splash config.
