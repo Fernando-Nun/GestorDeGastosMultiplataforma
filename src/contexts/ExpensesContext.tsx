@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { supabase, type Expense, type ExpenseInsert } from '@/lib/supabase'
+import type { Expense, ExpenseInsert } from '@/lib/types'
 import { useAuth } from './AuthContext'
 
 interface ExpensesContextValue {
@@ -14,52 +14,70 @@ interface ExpensesContextValue {
 const ExpensesContext = createContext<ExpensesContextValue | null>(null)
 
 export function ExpensesProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth()
+  const { user, session } = useAuth()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(false)
 
   const fetchExpenses = useCallback(async () => {
-    if (!user) {
+    if (!user || !session) {
       setExpenses([])
       return
     }
     setLoading(true)
-    const { data, error } = await supabase
-      .from('expenses')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('payment_day', { ascending: true })
-    if (!error && data) setExpenses(data as Expense[])
-    setLoading(false)
-  }, [user])
+    try {
+      const response = await fetch('/api/expenses', {
+        credentials: 'same-origin',
+      })
+      if (response.ok) {
+        const data = (await response.json()) as Expense[]
+        setExpenses(data)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }, [session, user])
 
   useEffect(() => {
     fetchExpenses()
   }, [fetchExpenses])
 
   const addExpense = async (data: ExpenseInsert): Promise<string | null> => {
-    if (!user) return 'No autenticado'
-    const { error } = await supabase
-      .from('expenses')
-      .insert({ ...data, user_id: user.id })
-    if (error) return error.message
+    if (!session) return 'No autenticado'
+    const response = await fetch('/api/expenses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) return ((await response.json()) as { error?: string }).error ?? 'No se pudo guardar el gasto'
     await fetchExpenses()
     return null
   }
 
   const updateExpense = async (id: string, data: Partial<ExpenseInsert>): Promise<string | null> => {
-    const { error } = await supabase
-      .from('expenses')
-      .update({ ...data, updated_at: new Date().toISOString() })
-      .eq('id', id)
-    if (error) return error.message
+    if (!session) return 'No autenticado'
+    const response = await fetch(`/api/expenses/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) return ((await response.json()) as { error?: string }).error ?? 'No se pudo actualizar el gasto'
     await fetchExpenses()
     return null
   }
 
   const deleteExpense = async (id: string): Promise<string | null> => {
-    const { error } = await supabase.from('expenses').delete().eq('id', id)
-    if (error) return error.message
+    if (!session) return 'No autenticado'
+    const response = await fetch(`/api/expenses/${id}`, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    })
+    if (!response.ok) return ((await response.json()) as { error?: string }).error ?? 'No se pudo cancelar el gasto'
     setExpenses(prev => prev.filter(e => e.id !== id))
     return null
   }

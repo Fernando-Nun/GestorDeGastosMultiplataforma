@@ -69,12 +69,15 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
             className="w-16 h-16 rounded-full flex items-center justify-center text-2xl"
             style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)' }}
           >
-            ✉️
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#34d399' }} aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3 7 9 6 9-6" />
+            </svg>
           </div>
           <div>
-            <p className="font-semibold mb-1" style={{ color: '#34d399' }}>¡Correo enviado!</p>
+             <p className="font-semibold mb-1" style={{ color: '#34d399' }}>Solicitud recibida</p>
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Revisa tu bandeja de entrada y sigue las instrucciones del correo.
+               Si la cuenta existe, recibirás instrucciones para restablecer tu contraseña.
             </p>
           </div>
           <GlassButton variant="ghost" onClick={onBack} className="mt-2">

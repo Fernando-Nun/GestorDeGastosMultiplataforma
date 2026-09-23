@@ -6,7 +6,7 @@ import { LogoPlaceholder } from '@/components/ui/LogoPlaceholder'
 import { ExpenseCard } from './ExpenseCard'
 import { EmptyState } from './EmptyState'
 import { ExpenseForm } from '@/components/expenses/ExpenseForm'
-import type { Expense } from '@/lib/supabase'
+import type { Expense } from '@/lib/types'
 import { fetchUSDtoMXN } from '@/lib/currency'
 
 const urgencyOrder = { red: 0, yellow: 1, green: 2 }

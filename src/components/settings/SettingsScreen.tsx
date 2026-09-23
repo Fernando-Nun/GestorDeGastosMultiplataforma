@@ -234,7 +234,7 @@ export function SettingsScreen() {
         {/* App info */}
         <div className="text-center py-4">
           <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            Ember v1.0.0 — Desarrollado con ♥
+             Ember v1.0.0 — Gestor de suscripciones
           </p>
         </div>
       </div>

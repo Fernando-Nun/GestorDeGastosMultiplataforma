@@ -5,7 +5,7 @@ import { GlassButton } from '@/components/ui/GlassButton'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { useExpenses } from '@/contexts/ExpensesContext'
 import { formatMXN, formatUSD } from '@/lib/currency'
-import type { Expense, ExpenseInsert } from '@/lib/supabase'
+import type { Expense, ExpenseInsert } from '@/lib/types'
 
 interface ExpenseFormProps {
   expense: Expense | null

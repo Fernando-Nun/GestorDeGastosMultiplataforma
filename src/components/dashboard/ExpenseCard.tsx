@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { Expense } from '@/lib/supabase'
+import type { Expense } from '@/lib/types'
 import { getUrgency, getDaysUntil, useExpenses } from '@/contexts/ExpensesContext'
 import { UrgencyBadge } from '@/components/ui/UrgencyBadge'
 import { formatMXN, formatUSD } from '@/lib/currency'
