@@ -7,4 +7,4 @@ The Expo mobile artifact must use a non-root preview path when the web artifact 
 
 **Why:** The artifact registration and Expo config schema are stricter than a standalone Expo project; following standalone defaults creates either a path conflict or a Doctor failure.
 
-**How to apply:** Check existing artifact preview paths before creating a mobile artifact, and run Expo Doctor after changing `app.json`. A missing `libglib-2.0.so.0` warning from optional React Native DevTools does not prevent Metro or Expo Go from running.
+**How to apply:** Check existing artifact preview paths before creating a mobile artifact, and run Expo Doctor after changing `app.json`. Keep the mobile color hook driven by ThemeContext rather than only the device scheme, and keep dark-mode surfaces neutral. A missing `libglib-2.0.so.0` warning from optional React Native DevTools does not prevent Metro or Expo Go from running.

@@ -86,7 +86,7 @@ function SplashView() {
         { backgroundColor: colors.meshOne, paddingTop: insets.top },
       ]}
     >
-      <View style={[styles.orb, { backgroundColor: colors.primary }]} />
+      <View style={[styles.orb, { backgroundColor: colors.meshTwo }]} />
       <Image
         source={require('../assets/images/icon.png')}
         style={styles.splashIcon}
@@ -234,10 +234,14 @@ function AuthView() {
     <KeyboardAwareScrollViewCompat
       contentContainerStyle={[
         styles.authContent,
-        { paddingTop: insets.top + 28, paddingBottom: insets.bottom + 24 },
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top + 28,
+          paddingBottom: insets.bottom + 24,
+        },
       ]}
     >
-      <View style={[styles.authGlow, { backgroundColor: colors.primary }]} />
+      <View style={[styles.authGlow, { backgroundColor: colors.meshTwo }]} />
       <View style={styles.authBrand}>
         <Image
           source={require('../assets/images/icon.png')}
@@ -921,6 +925,7 @@ function SettingsView() {
 
   return (
     <ScrollView
+      style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={[
         styles.settingsContent,
         { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 104 },
