@@ -7,4 +7,4 @@ For Ember, retain the existing client request flow unless a replacement preserve
 
 **Why:** During the multi-artifact port, the existing client was kept intact despite adding a generated API contract. Replacing its requests with hooks during a structural migration would have risked changing authentication and mutation behavior without adding user-visible value.
 
-**How to apply:** When later changing Ember's API callers, verify credentials, response envelopes, error text, refresh after mutations, and logout together rather than assuming generated hooks are a drop-in replacement.
+**How to apply:** When later changing Ember's API callers, verify credentials, response envelopes, error text, refresh after mutations, and logout together rather than assuming generated hooks are a drop-in replacement. The Expo web preview calls the API from a separate `expo.spock.replit.dev` origin, so credentialed requests require an explicit CORS allowlist rather than `*`.

@@ -6,6 +6,16 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+const allowedOrigins = new Set(
+  [
+    process.env.REPLIT_DEV_DOMAIN,
+    process.env.REPLIT_EXPO_DEV_DOMAIN,
+    process.env.EXPO_PUBLIC_DOMAIN,
+  ]
+    .filter(Boolean)
+    .map(domain => (domain!.startsWith("http") ? domain! : `https://${domain}`)),
+);
+
 app.use(
   pinoHttp({
     logger,
@@ -25,7 +35,23 @@ app.use(
     },
   }),
 );
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin(origin, callback) {
+      const isLocalOrigin = Boolean(
+        origin && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin),
+      );
+
+      if (!origin || allowedOrigins.has(origin) || isLocalOrigin) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin is not allowed by CORS"));
+    },
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
