@@ -5,27 +5,84 @@ import { getUrgency, getDaysUntil, useExpenses } from '@/contexts/ExpensesContex
 import { UrgencyBadge } from '@/components/ui/UrgencyBadge'
 import { formatMXN, formatUSD } from '@/lib/currency'
 
-const SERVICE_ICONS: Record<string, string> = {
-  netflix: '🎬',
-  disney: '🏰',
-  spotify: '🎵',
-  amazon: '📦',
-  youtube: '▶️',
-  hbo: '📺',
-  apple: '🍎',
-  microsoft: '🪟',
-  adobe: '🎨',
-  icloud: '☁️',
-  google: '🔍',
-  dropbox: '📁',
+type ServiceIconName =
+  | 'film'
+  | 'castle'
+  | 'music'
+  | 'package'
+  | 'play'
+  | 'tv'
+  | 'apple'
+  | 'window'
+  | 'palette'
+  | 'cloud'
+  | 'search'
+  | 'folder'
+  | 'receipt'
+
+const SERVICE_ICONS: Record<string, ServiceIconName> = {
+  netflix: 'film',
+  disney: 'castle',
+  spotify: 'music',
+  amazon: 'package',
+  youtube: 'play',
+  hbo: 'tv',
+  apple: 'apple',
+  microsoft: 'window',
+  adobe: 'palette',
+  icloud: 'cloud',
+  google: 'search',
+  dropbox: 'folder',
 }
 
-function getServiceIcon(name: string): string {
+function getServiceIcon(name: string): ServiceIconName {
   const lower = name.toLowerCase()
   for (const [key, icon] of Object.entries(SERVICE_ICONS)) {
     if (lower.includes(key)) return icon
   }
-  return '📋'
+  return 'receipt'
+}
+
+function ServiceIcon({ name }: { name: ServiceIconName }) {
+  const common = {
+    width: 21,
+    height: 21,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  }
+
+  switch (name) {
+    case 'film':
+      return <svg {...common}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7 3v18M17 3v18M3 8h4M17 8h4M3 16h4M17 16h4" /></svg>
+    case 'castle':
+      return <svg {...common}><path d="M3 21h18M5 21V9l3-3 4 3 4-3 3 3v12M8 21v-5h3v5M15 21v-5h3v5M12 9V5M10 5h4" /></svg>
+    case 'music':
+      return <svg {...common}><path d="M9 18V5l10-2v13M9 9l10-2" /><circle cx="6" cy="18" r="3" /><circle cx="16" cy="16" r="3" /></svg>
+    case 'package':
+      return <svg {...common}><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4.5 7.5 7.5 4 7.5-4M12 12v9M8 5l8 4.5" /></svg>
+    case 'play':
+      return <svg {...common}><rect x="3" y="4" width="18" height="16" rx="3" /><path d="m10 8 5 4-5 4V8Z" /></svg>
+    case 'tv':
+      return <svg {...common}><rect x="3" y="5" width="18" height="13" rx="2" /><path d="m8 2 4 3 4-3M8 21h8" /></svg>
+    case 'apple':
+      return <svg {...common}><path d="M15.5 7.5c1.7 0 3.5 1.7 3.5 4.3 0 3.2-2.6 7.2-4.6 7.2-1 0-1.4-.7-2.9-.7s-2 .7-3 .7c-2 0-4.5-3.8-4.5-7.1 0-3.2 2-4.9 3.9-4.9 1.2 0 2.3.8 3.1.8s1.9-.8 3-.8h1.5Z" /><path d="M14 4c.7-.9 1.8-1.5 2.9-1.5.1 1.2-.3 2.3-1 3.1-.7.8-1.8 1.4-2.9 1.3-.1-1.1.4-2.2 1-2.9Z" /></svg>
+    case 'window':
+      return <svg {...common}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M12 3v18M3 12h18" /></svg>
+    case 'palette':
+      return <svg {...common}><path d="M12 3a9 9 0 0 0 0 18h1.5a1.5 1.5 0 0 0 0-3H12a1.5 1.5 0 0 1 0-3h1.5a7.5 7.5 0 0 0-1.5-15Z" /><circle cx="7.5" cy="10" r=".8" fill="currentColor" /><circle cx="9" cy="6.5" r=".8" fill="currentColor" /><circle cx="14" cy="6.5" r=".8" fill="currentColor" /></svg>
+    case 'cloud':
+      return <svg {...common}><path d="M17.5 19H8a5 5 0 1 1 1.1-9.9A6 6 0 0 1 20 11a4 4 0 0 1-2.5 8Z" /></svg>
+    case 'search':
+      return <svg {...common}><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 5 5" /></svg>
+    case 'folder':
+      return <svg {...common}><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H10l2 2h6.5A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-10Z" /></svg>
+    default:
+      return <svg {...common}><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 12h6M9 16h6" /></svg>
+  }
 }
 
 const urgencyBorderColor = {
@@ -91,10 +148,10 @@ export function ExpenseCard({ expense, onEdit, mxnRate }: ExpenseCardProps) {
               {/* Left: icon + info */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div
-                  className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
                   style={{ background: 'rgba(124,92,252,0.1)', border: '1px solid rgba(124,92,252,0.15)' }}
                 >
-                  {icon}
+                  <ServiceIcon name={icon} />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-sm truncate" style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--text-primary)' }}>
@@ -102,7 +159,10 @@ export function ExpenseCard({ expense, onEdit, mxnRate }: ExpenseCardProps) {
                   </p>
                   {expense.card_label && (
                     <p className="text-xs mt-0.5 flex items-center gap-1 truncate" style={{ color: 'var(--text-tertiary)' }}>
-                      <span>💳</span>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                        <path d="M2 10h20" />
+                      </svg>
                       {expense.card_label}
                     </p>
                   )}

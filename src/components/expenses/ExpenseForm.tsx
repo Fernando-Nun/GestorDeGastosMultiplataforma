@@ -15,8 +15,8 @@ interface ExpenseFormProps {
 
 const DAYS = Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: `Día ${i + 1}` }))
 const CURRENCIES = [
-  { value: 'MXN', label: '🇲🇽 MXN — Pesos mexicanos' },
-  { value: 'USD', label: '🇺🇸 USD — Dólares' },
+  { value: 'MXN', label: 'MXN — Pesos mexicanos' },
+  { value: 'USD', label: 'USD — Dólares' },
 ]
 
 export function ExpenseForm({ expense, mxnRate, onClose }: ExpenseFormProps) {
@@ -218,8 +218,8 @@ export function ExpenseForm({ expense, mxnRate, onClose }: ExpenseFormProps) {
                           color: 'var(--text-primary)',
                         }}
                       >
-                        <option value="MXN">🇲🇽 MXN</option>
-                        <option value="USD">🇺🇸 USD</option>
+                        <option value="MXN">MXN</option>
+                        <option value="USD">USD</option>
                       </select>
                     </div>
                   </div>
