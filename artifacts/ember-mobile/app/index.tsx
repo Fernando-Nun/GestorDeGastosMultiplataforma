@@ -118,22 +118,22 @@ function Field({
 }) {
   return (
     <View style={styles.field}>
-      <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
+      <Text style={[styles.fieldLabel, { color: colors.authLabel }]}>
         {label}
       </Text>
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={colors.textTertiary}
+        placeholderTextColor={colors.authPlaceholder}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={keyboardType === 'email-address' ? 'none' : 'sentences'}
         style={[
           styles.input,
           {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
+            backgroundColor: colors.authInput,
+            borderColor: colors.authInputBorder,
             color: colors.text,
           },
         ]}
@@ -253,13 +253,13 @@ function AuthView() {
         style={[
           styles.authCard,
           {
-            backgroundColor: colors.surfaceStrong,
-            borderColor: colors.border,
+            backgroundColor: colors.authCard,
+            borderColor: colors.authInputBorder,
           },
         ]}
       >
         {mode !== 'forgot' ? (
-          <View style={[styles.authTabs, { backgroundColor: colors.surface }]}>
+          <View style={[styles.authTabs, { backgroundColor: colors.authPanel }]}>
             {(['login', 'register'] as const).map(tab => (
               <Pressable
                 key={tab}
@@ -276,7 +276,7 @@ function AuthView() {
                 <Text
                   style={[
                     styles.authTabText,
-                    { color: mode === tab ? colors.primaryForeground : colors.textSecondary },
+                    { color: mode === tab ? colors.primaryForeground : colors.authLabel },
                   ]}
                 >
                   {tab === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
@@ -307,7 +307,7 @@ function AuthView() {
               ? 'Bienvenido de nuevo'
               : 'Crea tu cuenta'}
         </Text>
-        <Text style={[styles.formDescription, { color: colors.textTertiary }]}>
+        <Text style={[styles.formDescription, { color: colors.authDescription }]}>
           {mode === 'forgot'
             ? 'Te enviaremos instrucciones si el correo está registrado.'
             : 'Tus gastos recurrentes, organizados en un solo lugar.'}
