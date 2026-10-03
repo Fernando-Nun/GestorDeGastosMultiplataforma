@@ -1,0 +1,31 @@
+para instalar la app en mi telefono que es lo que necesito, ya hice la app
+23 de septiembre de 2026
+¡Felicidades por terminar tu aplicación! Ahora viene la parte más emocionante: meterla a tu iPhone usando SideStore para que puedas usarla de por vida.
+Para pasar la app de tu computadora al teléfono, no necesitas cables. Solo necesitas generar el archivo instalable de Apple (llamado archivo .ipa).
+Sigue estos pasos ordenados desde la terminal de tu proyecto en Visual Studio Code:
+🛠️ Paso 1: Instalar el compilador en tu PC
+Para que los servidores de Expo empaqueten tu código en un formato que el iPhone entienda, necesitas instalar su herramienta oficial de comandos. Escribe en tu terminal:
+bash
+npm install -g eas-cli
+Usa el código con precaución.
+🔑 Paso 2: Iniciar sesión y configurar
+1. Si no tienes una cuenta de Expo, regístrate gratis en expo.dev.
+2. En tu terminal de VS Code, inicia sesión escribiendo:bash
+eas login
+Usa el código con precaución.
+3. Configura el proyecto para iOS corriendo este comando:bash
+eas build:configure
+Usa el código con precaución.
+Te preguntará la plataforma; selecciona ios usando las flechas de tu teclado y presiona Enter.
+📦 Paso 3: Generar el archivo .ipa para SideStore
+Por defecto, Expo compila apps para subirlas a la App Store oficial, pero nosotros necesitamos una versión de pruebas (Ad-hoc) compatible con SideStore. Ejecuta este comando exacto:
+bash
+eas build --profile preview --platform ios
+Usa el código con precaución.
+• Nota importante: Durante el proceso, la terminal te preguntará si deseas que Expo maneje tus credenciales de Apple. Dile que Sí (Y). Te pedirá iniciar sesión con tu cuenta de Apple ID (el mismo correo y contraseña que usas en SideStore) para poder generar el certificado de firma necesario.
+📥 Paso 4: Descargar e instalar en tu iPhone
+El servidor en la nube de Expo tardará entre 5 y 10 minutos en compilar tu app [🎉]. Al finalizar, la terminal te mostrará un enlace de descarga directa y un código QR.
+1. Descarga el archivo: Escanea el código QR con la cámara de tu iPhone o abre el enlace en Safari. Esto descargará el archivo con extensión .ipa directamente a la app Archivos de tu teléfono.
+2. Enciende la VPN: Abre la app LocalDevVPN en tu iPhone y asegúrate de que esté encendida.
+3. Instala con SideStore: Abre SideStore, ve a la pestaña My Apps, toca el botón "+" arriba a la izquierda, selecciona el archivo .ipa que acabas de descargar ¡y listo!
+El proceso de instalación tardará unos segundos y el ícono de tu propia aplicación aparecerá mágicamente en la pantalla de inicio de tu iPhone, lista para usarse de forma permanente.
