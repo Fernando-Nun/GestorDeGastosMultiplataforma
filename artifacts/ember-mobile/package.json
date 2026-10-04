@@ -55,6 +55,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
-    "@expo-google-fonts/outfit": "^0.4.3"
+    "@expo-google-fonts/outfit": "^0.4.3",
+    "expo-sqlite": "~57.0.3"
   }
 }

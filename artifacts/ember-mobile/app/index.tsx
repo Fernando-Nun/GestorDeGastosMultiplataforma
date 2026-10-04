@@ -19,17 +19,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { ExpensesProvider, useExpenses } from '@/contexts/ExpensesContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useColors } from '@/hooks/useColors';
-import {
-  fetchUSDtoMXN,
-  formatMXN,
-  formatUSD,
-} from '@/lib/api';
+import { getLocalUsdMxnRate, setLocalUsdMxnRate } from '@/lib/localDatabase';
+import { formatMXN, formatUSD } from '@/lib/money';
 import type { Expense, ExpenseInput } from '@/lib/types';
-import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
 type Tab = 'home' | 'settings';
@@ -76,35 +72,11 @@ function formatAmount(amount: number, currency: Expense['currency']) {
   return currency === 'USD' ? formatUSD(amount) : formatMXN(amount);
 }
 
-function SplashView() {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
-  return (
-    <View
-      style={[
-        styles.splash,
-        { backgroundColor: colors.meshOne, paddingTop: insets.top },
-      ]}
-    >
-      <View style={[styles.orb, { backgroundColor: colors.meshTwo }]} />
-      <Image
-        source={require('../assets/images/icon.png')}
-        style={styles.splashIcon}
-      />
-      <Text style={[styles.splashTitle, { color: colors.text }]}>Ember</Text>
-      <Text style={[styles.splashSubtitle, { color: colors.textTertiary }]}>
-        Gestiona tus suscripciones
-      </Text>
-    </View>
-  );
-}
-
 function Field({
   label,
   value,
   onChangeText,
   placeholder,
-  secureTextEntry,
   keyboardType = 'default',
   colors,
 }: {
@@ -112,28 +84,24 @@ function Field({
   value: string;
   onChangeText: (value: string) => void;
   placeholder: string;
-  secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'decimal-pad' | 'number-pad';
+  keyboardType?: 'default' | 'decimal-pad' | 'number-pad';
   colors: ReturnType<typeof useColors>;
 }) {
   return (
     <View style={styles.field}>
-      <Text style={[styles.fieldLabel, { color: colors.authLabel }]}>
-        {label}
-      </Text>
+      <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={colors.authPlaceholder}
-        secureTextEntry={secureTextEntry}
+        placeholderTextColor={colors.textTertiary}
         keyboardType={keyboardType}
-        autoCapitalize={keyboardType === 'email-address' ? 'none' : 'sentences'}
+        autoCapitalize="sentences"
         style={[
           styles.input,
           {
-            backgroundColor: colors.authInput,
-            borderColor: colors.authInputBorder,
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
             color: colors.text,
           },
         ]}
@@ -193,211 +161,27 @@ function PrimaryButton({
   );
 }
 
-function AuthView() {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
-  const { signIn, signUp, resetPassword } = useAuth();
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  const submit = async () => {
-    Keyboard.dismiss();
-    setError('');
-    if (!email.trim()) {
-      setError('Ingresa tu correo electrónico');
-      return;
-    }
-    if (mode !== 'forgot' && password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    setLoading(true);
-    const result =
-      mode === 'login'
-        ? await signIn(email.trim(), password)
-        : mode === 'register'
-          ? await signUp(email.trim(), password)
-          : await resetPassword(email.trim());
-    setLoading(false);
-    if (result) {
-      setError(result);
-    } else if (mode === 'forgot') {
-      setSent(true);
-    }
-  };
-
-  return (
-    <KeyboardAwareScrollViewCompat
-      contentContainerStyle={[
-        styles.authContent,
-        {
-          backgroundColor: colors.background,
-          paddingTop: insets.top + 28,
-          paddingBottom: insets.bottom + 24,
-        },
-      ]}
-    >
-      <View style={[styles.authGlow, { backgroundColor: colors.meshTwo }]} />
-      <View style={styles.authBrand}>
-        <Image
-          source={require('../assets/images/icon.png')}
-          style={styles.authIcon}
-        />
-        <Text style={[styles.brandTitle, { color: colors.text }]}>Ember</Text>
-        <Text style={[styles.authTagline, { color: colors.textTertiary }]}>
-          Gestiona tus suscripciones
-        </Text>
-      </View>
-
-      <View
-        style={[
-          styles.authCard,
-          {
-            backgroundColor: colors.authCard,
-            borderColor: colors.authInputBorder,
-          },
-        ]}
-      >
-        {mode !== 'forgot' ? (
-          <View style={[styles.authTabs, { backgroundColor: colors.authPanel }]}>
-            {(['login', 'register'] as const).map(tab => (
-              <Pressable
-                key={tab}
-                onPress={() => {
-                  setMode(tab);
-                  setError('');
-                  setSent(false);
-                }}
-                style={[
-                  styles.authTab,
-                  mode === tab && { backgroundColor: colors.primary },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.authTabText,
-                    { color: mode === tab ? colors.primaryForeground : colors.authLabel },
-                  ]}
-                >
-                  {tab === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : (
-          <Pressable
-            onPress={() => {
-              setMode('login');
-              setSent(false);
-              setError('');
-            }}
-            style={styles.backRow}
-          >
-            <Feather name="arrow-left" size={17} color={colors.textSecondary} />
-            <Text style={[styles.backText, { color: colors.textSecondary }]}>
-              Volver a iniciar sesión
-            </Text>
-          </Pressable>
-        )}
-
-        <Text style={[styles.formTitle, { color: colors.text }]}>
-          {mode === 'forgot'
-            ? 'Recupera tu acceso'
-            : mode === 'login'
-              ? 'Bienvenido de nuevo'
-              : 'Crea tu cuenta'}
-        </Text>
-        <Text style={[styles.formDescription, { color: colors.authDescription }]}>
-          {mode === 'forgot'
-            ? 'Te enviaremos instrucciones si el correo está registrado.'
-            : 'Tus gastos recurrentes, organizados en un solo lugar.'}
-        </Text>
-
-        {sent ? (
-          <View style={[styles.successBox, { backgroundColor: `${colors.urgentGreen}18`, borderColor: `${colors.urgentGreen}45` }]}>
-            <Feather name="check-circle" size={28} color={colors.urgentGreen} />
-            <Text style={[styles.successTitle, { color: colors.urgentGreen }]}>
-              Solicitud recibida
-            </Text>
-            <Text style={[styles.successText, { color: colors.textSecondary }]}>
-              Si existe una cuenta con ese correo, recibirás instrucciones.
-            </Text>
-          </View>
-        ) : (
-          <>
-            <Field
-              label="Correo electrónico"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="tu@correo.com"
-              keyboardType="email-address"
-              colors={colors}
-            />
-            {mode !== 'forgot' ? (
-              <Field
-                label="Contraseña"
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Mínimo 6 caracteres"
-                secureTextEntry
-                colors={colors}
-              />
-            ) : null}
-            {mode === 'login' ? (
-              <Pressable
-                onPress={() => {
-                  setMode('forgot');
-                  setError('');
-                }}
-                style={styles.forgotButton}
-              >
-                <Text style={[styles.forgotText, { color: colors.primary }]}>
-                  ¿Olvidaste tu contraseña?
-                </Text>
-              </Pressable>
-            ) : null}
-            {error ? (
-              <Text style={[styles.errorText, { color: colors.urgentRed }]}>
-                {error}
-              </Text>
-            ) : null}
-            <PrimaryButton
-              label={
-                mode === 'forgot'
-                  ? 'Enviar instrucciones'
-                  : mode === 'login'
-                    ? 'Iniciar sesión'
-                    : 'Crear cuenta'
-              }
-              onPress={submit}
-              loading={loading}
-              colors={colors}
-            />
-          </>
-        )}
-      </View>
-      <Text style={[styles.authFooter, { color: colors.textTertiary }]}>
-        Tus datos están protegidos y encriptados
-      </Text>
-    </KeyboardAwareScrollViewCompat>
-  );
-}
-
-function SummaryCard({ rate }: { rate: number | null }) {
+function SummaryCard({
+  rate,
+  baseCurrency,
+}: {
+  rate: number | null;
+  baseCurrency: 'MXN' | 'USD';
+}) {
   const colors = useColors();
   const { expenses } = useExpenses();
   const month = new Intl.DateTimeFormat('es-MX', { month: 'long' }).format(
     new Date(),
   );
-  const total = expenses.reduce(
-    (sum, expense) =>
-      sum + (expense.currency === 'USD' && rate ? expense.amount * rate : expense.amount),
-    0,
-  );
+  const needsRate =
+    !rate && expenses.some(expense => expense.currency !== baseCurrency);
+  const total = expenses.reduce((sum, expense) => {
+    if (expense.currency === baseCurrency) return sum + expense.amount;
+    if (!rate) return sum;
+    return sum + (baseCurrency === 'MXN'
+      ? expense.amount * rate
+      : expense.amount / rate);
+  }, 0);
   const counts = {
     green: expenses.filter(item => urgencyFor(item.payment_day) === 'green').length,
     yellow: expenses.filter(item => urgencyFor(item.payment_day) === 'yellow').length,
@@ -417,11 +201,16 @@ function SummaryCard({ rate }: { rate: number | null }) {
       <View style={styles.summaryRow}>
         <View>
           <Text style={[styles.totalValue, { color: colors.text }]}>
-            {rate ? formatMXN(total) : '—'}
+            {needsRate ? '—' : baseCurrency === 'MXN' ? formatMXN(total) : formatUSD(total)}
           </Text>
           <Text style={[styles.caption, { color: colors.textTertiary }]}>
             {expenses.length} {expenses.length === 1 ? 'suscripción' : 'suscripciones'}
           </Text>
+          {needsRate ? (
+            <Text style={[styles.caption, { color: colors.urgentYellow }]}>
+              Configura el tipo de cambio en Ajustes
+            </Text>
+          ) : null}
         </View>
         <View style={styles.urgencyCounts}>
           {(['green', 'yellow', 'red'] as const).map(level =>
@@ -756,16 +545,17 @@ function ExpenseSheet({
 
 function HomeView({
   rate,
+  baseCurrency,
   onAdd,
   onEdit,
 }: {
   rate: number | null;
+  baseCurrency: 'MXN' | 'USD';
   onAdd: () => void;
   onEdit: (expense: Expense) => void;
 }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
   const { expenses, loading, error, refresh, deleteExpense } = useExpenses();
   const sorted = useMemo(
     () =>
@@ -818,13 +608,15 @@ function HomeView({
             />
             <Text style={[styles.headerBrand, { color: colors.text }]}>Ember</Text>
           </View>
-          <View style={[styles.avatar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.avatarText, { color: colors.primary }]}>
-              {user?.email?.[0]?.toUpperCase() ?? 'U'}
-            </Text>
+          <View
+            accessible
+            accessibilityLabel="Datos guardados en este dispositivo"
+            style={[styles.avatar, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            <Feather name="database" size={16} color={colors.primary} />
           </View>
         </View>
-        <SummaryCard rate={rate} />
+        <SummaryCard rate={rate} baseCurrency={baseCurrency} />
         <View style={styles.sectionHeader}>
           <View>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
@@ -896,21 +688,34 @@ function HomeView({
   );
 }
 
-function SettingsView() {
+function SettingsView({
+  rate,
+  onRateChange,
+  baseCurrency,
+  onBaseCurrencyChange,
+}: {
+  rate: number | null;
+  onRateChange: (rate: number | null) => void;
+  baseCurrency: 'MXN' | 'USD';
+  onBaseCurrencyChange: (currency: 'MXN' | 'USD') => void;
+}) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, signOut } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [silent, setSilent] = useState(false);
-  const [baseCurrency, setBaseCurrency] = useState<'MXN' | 'USD'>('MXN');
+  const [exchangeRate, setExchangeRate] = useState(rate ? String(rate) : '');
+  const [rateError, setRateError] = useState('');
+  const [savingRate, setSavingRate] = useState(false);
 
   useEffect(() => {
-    void Promise.all([
-      AsyncStorage.getItem('@ember/silent-notifs'),
-      AsyncStorage.getItem('@ember/base-currency'),
-    ]).then(([silentValue, currencyValue]) => {
+    void AsyncStorage.getItem('@ember/silent-notifs').then(silentValue => {
       setSilent(silentValue === 'true');
-      if (currencyValue === 'USD') setBaseCurrency('USD');
+    });
+    void getLocalUsdMxnRate().then(storedRate => {
+      if (storedRate !== null) {
+        setExchangeRate(String(storedRate));
+        onRateChange(storedRate);
+      }
     });
   }, []);
 
@@ -919,8 +724,25 @@ function SettingsView() {
     void AsyncStorage.setItem('@ember/silent-notifs', String(value));
   };
   const changeCurrency = (value: 'MXN' | 'USD') => {
-    setBaseCurrency(value);
+    onBaseCurrencyChange(value);
     void AsyncStorage.setItem('@ember/base-currency', value);
+  };
+  const saveRate = async () => {
+    const parsed = Number(exchangeRate.replace(',', '.'));
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setRateError('Ingresa un tipo de cambio mayor que cero');
+      return;
+    }
+    setSavingRate(true);
+    setRateError('');
+    try {
+      await setLocalUsdMxnRate(parsed);
+      onRateChange(parsed);
+    } catch (error) {
+      setRateError(error instanceof Error ? error.message : 'No se pudo guardar');
+    } finally {
+      setSavingRate(false);
+    }
   };
 
   return (
@@ -942,23 +764,12 @@ function SettingsView() {
           </Text>
         </View>
       </View>
-      <SettingsSection title="Cuenta" colors={colors}>
-        <SettingRow
-          icon="user"
-          title="Correo electrónico"
-          description={user?.email ?? '—'}
-          colors={colors}
-          right={<Text style={[styles.verified, { color: colors.urgentGreen }]}>Verificado</Text>}
-        />
-        <Pressable
-          onPress={() => void signOut()}
-          style={[styles.signOutButton, { backgroundColor: `${colors.urgentRed}15`, borderColor: `${colors.urgentRed}35` }]}
-        >
-          <Feather name="log-out" size={16} color={colors.urgentRed} />
-          <Text style={[styles.signOutText, { color: colors.urgentRed }]}>
-            Cerrar sesión
-          </Text>
-        </Pressable>
+      <SettingsSection title="Datos locales" colors={colors}>
+        <Text style={[styles.localDataText, { color: colors.textSecondary }]}>
+          Tus suscripciones se guardan en este dispositivo. No necesitas una
+          cuenta y los datos no se sincronizan automáticamente con otros
+          teléfonos.
+        </Text>
       </SettingsSection>
       <SettingsSection title="Apariencia" colors={colors}>
         <SettingRow
@@ -989,6 +800,54 @@ function SettingsView() {
             </View>
           }
         />
+      </SettingsSection>
+      <SettingsSection title="Conversión de moneda" colors={colors}>
+        <Text style={[styles.localDataText, { color: colors.textSecondary }]}>
+          Define cuántos pesos mexicanos equivale 1 dólar. El valor se guarda
+          localmente y Ember no consulta servicios externos.
+        </Text>
+        <View style={styles.exchangeRateRow}>
+          <Text style={[styles.settingTitle, styles.exchangeRateLabel, { color: colors.text }]}>
+            MXN por 1 USD
+          </Text>
+          <TextInput
+            accessibilityLabel="Tipo de cambio de dólares a pesos"
+            keyboardType="decimal-pad"
+            value={exchangeRate}
+            onChangeText={value => {
+              setExchangeRate(value);
+              setRateError('');
+            }}
+            placeholder="Ej. 18.00"
+            placeholderTextColor={colors.textTertiary}
+            style={[
+              styles.exchangeRateInput,
+              {
+                color: colors.text,
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+          />
+        </View>
+        {rateError ? (
+          <Text style={[styles.errorText, { color: colors.urgentRed }]}>
+            {rateError}
+          </Text>
+        ) : null}
+        <Pressable
+          accessibilityRole="button"
+          disabled={savingRate}
+          onPress={() => void saveRate()}
+          style={[
+            styles.rateSaveButton,
+            { backgroundColor: colors.primary, opacity: savingRate ? 0.6 : 1 },
+          ]}
+        >
+          <Text style={[styles.primaryButtonText, { color: colors.primaryForeground }]}>
+            {savingRate ? 'Guardando…' : 'Guardar tipo de cambio'}
+          </Text>
+        </Pressable>
       </SettingsSection>
       <SettingsSection title="Notificaciones" colors={colors}>
         <SettingRow
@@ -1107,14 +966,24 @@ function BottomNav({
   );
 }
 
-function AuthenticatedApp() {
+function EmberApp() {
   const colors = useColors();
   const [tab, setTab] = useState<Tab>('home');
   const [rate, setRate] = useState<number | null>(null);
+  const [baseCurrency, setBaseCurrency] = useState<'MXN' | 'USD'>('MXN');
   const [sheetExpense, setSheetExpense] = useState<Expense | null | undefined>();
 
   useEffect(() => {
-    void fetchUSDtoMXN().then(setRate);
+    let active = true;
+    void getLocalUsdMxnRate().then(value => {
+      if (active) setRate(value);
+    });
+    void AsyncStorage.getItem('@ember/base-currency').then(value => {
+      if (active && value === 'USD') setBaseCurrency('USD');
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const openAdd = () => setSheetExpense(null);
@@ -1125,9 +994,19 @@ function AuthenticatedApp() {
     <View style={styles.appRoot}>
       <View style={styles.appBody}>
         {tab === 'home' ? (
-          <HomeView rate={rate} onAdd={openAdd} onEdit={openEdit} />
+          <HomeView
+            rate={rate}
+            baseCurrency={baseCurrency}
+            onAdd={openAdd}
+            onEdit={openEdit}
+          />
         ) : (
-          <SettingsView />
+          <SettingsView
+            rate={rate}
+            onRateChange={setRate}
+            baseCurrency={baseCurrency}
+            onBaseCurrencyChange={setBaseCurrency}
+          />
         )}
       </View>
       <BottomNav tab={tab} onChange={setTab} />
@@ -1144,19 +1023,9 @@ function AuthenticatedApp() {
 }
 
 export default function IndexScreen() {
-  const { user, loading } = useAuth();
-  const [splashDone, setSplashDone] = useState(false);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setSplashDone(true), 1100);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  if (!splashDone || loading) return <SplashView />;
-  if (!user) return <AuthView />;
   return (
     <ExpensesProvider>
-      <AuthenticatedApp />
+      <EmberApp />
     </ExpensesProvider>
   );
 }
@@ -1168,43 +1037,17 @@ const styles = StyleSheet.create({
   homeContent: { paddingHorizontal: 20 },
   meshOrbTop: { position: 'absolute', width: 360, height: 300, borderRadius: 180, top: -130, left: -110, opacity: 0.5 },
   meshOrbBottom: { position: 'absolute', width: 420, height: 360, borderRadius: 210, bottom: -180, right: -160, opacity: 0.4 },
-  splash: { flex: 1, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  orb: { position: 'absolute', width: 280, height: 280, borderRadius: 140, opacity: 0.12 },
-  splashIcon: { width: 88, height: 88, borderRadius: 24, marginBottom: 18 },
-  splashTitle: { fontFamily: 'Outfit_700Bold', fontSize: 34, letterSpacing: 0.4 },
-  splashSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 13, marginTop: 5 },
-  authContent: { flexGrow: 1, justifyContent: 'space-between', paddingHorizontal: 20 },
-  authGlow: { position: 'absolute', width: 360, height: 300, borderRadius: 180, opacity: 0.12, top: -140, alignSelf: 'center' },
-  authBrand: { alignItems: 'center', marginBottom: 26 },
-  authIcon: { width: 72, height: 72, borderRadius: 21, marginBottom: 12 },
-  brandTitle: { fontFamily: 'Outfit_700Bold', fontSize: 30 },
-  authTagline: { fontFamily: 'Inter_400Regular', fontSize: 13, marginTop: 3 },
-  authCard: { borderRadius: 28, borderWidth: 1, padding: 20 },
-  authTabs: { flexDirection: 'row', borderRadius: 16, padding: 4, marginBottom: 24 },
-  authTab: { flex: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
-  authTabText: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
-  backRow: { flexDirection: 'row', gap: 7, alignItems: 'center', marginBottom: 20 },
-  backText: { fontFamily: 'Inter_500Medium', fontSize: 13 },
-  formTitle: { fontFamily: 'Outfit_700Bold', fontSize: 23, marginBottom: 6 },
-  formDescription: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, marginBottom: 20 },
   field: { gap: 7, marginBottom: 14 },
   fieldLabel: { fontFamily: 'Inter_600SemiBold', fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase' },
   input: { borderWidth: 1, borderRadius: 13, paddingHorizontal: 14, paddingVertical: Platform.OS === 'ios' ? 13 : 11, fontFamily: 'Inter_400Regular', fontSize: 15 },
-  forgotButton: { alignSelf: 'flex-end', marginTop: -3, marginBottom: 16 },
-  forgotText: { fontFamily: 'Inter_500Medium', fontSize: 12 },
   primaryButton: { minHeight: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, paddingHorizontal: 18 },
   primaryButtonText: { fontFamily: 'Inter_600SemiBold', fontSize: 14 },
   errorText: { fontFamily: 'Inter_500Medium', fontSize: 12, lineHeight: 18 },
-  authFooter: { textAlign: 'center', fontFamily: 'Inter_400Regular', fontSize: 11, marginTop: 22 },
-  successBox: { borderWidth: 1, borderRadius: 17, padding: 18, alignItems: 'center', marginVertical: 10 },
-  successTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 15, marginTop: 10 },
-  successText: { fontFamily: 'Inter_400Regular', fontSize: 12, textAlign: 'center', lineHeight: 18, marginTop: 5 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 21 },
   brandLockup: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   headerIcon: { width: 31, height: 31, borderRadius: 9 },
   headerBrand: { fontFamily: 'Outfit_700Bold', fontSize: 22 },
   avatar: { width: 38, height: 38, borderRadius: 19, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontFamily: 'Outfit_700Bold', fontSize: 15 },
   summaryCard: { borderRadius: 24, borderWidth: 1, padding: 19, marginBottom: 25 },
   eyebrow: { fontFamily: 'Inter_600SemiBold', fontSize: 10, letterSpacing: 1.3, textTransform: 'uppercase', marginBottom: 8 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
@@ -1275,12 +1118,15 @@ const styles = StyleSheet.create({
   settingTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
   settingDescription: { fontFamily: 'Inter_400Regular', fontSize: 11, marginTop: 3 },
   verified: { fontFamily: 'Inter_500Medium', fontSize: 10 },
-  signOutButton: { borderWidth: 1, borderRadius: 13, minHeight: 45, marginVertical: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
-  signOutText: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
   currencyPickerSmall: { borderWidth: 1, borderRadius: 11, flexDirection: 'row', padding: 2 },
   currencySmallOption: { borderRadius: 8, paddingVertical: 6, paddingHorizontal: 9 },
   infoBox: { borderWidth: 1, borderRadius: 13, padding: 11, marginVertical: 13 },
   infoText: { fontFamily: 'Inter_400Regular', fontSize: 11, lineHeight: 17 },
+  localDataText: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 18 },
+  exchangeRateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 14 },
+  exchangeRateLabel: { flex: 1 },
+  exchangeRateInput: { width: 110, borderWidth: 1, borderRadius: 11, paddingHorizontal: 11, paddingVertical: 9, textAlign: 'right', fontFamily: 'Inter_500Medium', fontSize: 14 },
+  rateSaveButton: { minHeight: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 12, paddingHorizontal: 14 },
   versionText: { fontFamily: 'Inter_400Regular', textAlign: 'center', fontSize: 11, marginTop: 4 },
   bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, borderTopWidth: 1, flexDirection: 'row', justifyContent: 'space-around', paddingTop: 10 },
   navItem: { alignItems: 'center', gap: 4, minWidth: 70 },

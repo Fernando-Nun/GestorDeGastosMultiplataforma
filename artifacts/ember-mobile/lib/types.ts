@@ -1,11 +1,5 @@
-export type User = {
-  id: string;
-  email: string;
-};
-
 export type Expense = {
   id: string;
-  user_id: string;
   service_name: string;
   payment_day: number;
   card_label: string | null;
@@ -17,5 +11,5 @@ export type Expense = {
 
 export type ExpenseInput = Omit<
   Expense,
-  'id' | 'user_id' | 'created_at' | 'updated_at'
+  'id' | 'created_at' | 'updated_at'
 >;

@@ -9,13 +9,12 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { useAuth } from './AuthContext';
 import {
-  createExpense,
-  deleteExpense,
-  listExpenses,
-  updateExpense,
-} from '@/lib/api';
+  createLocalExpense,
+  deleteLocalExpense,
+  listLocalExpenses,
+  updateLocalExpense,
+} from '@/lib/localDatabase';
 import type { Expense, ExpenseInput } from '@/lib/types';
 
 type ExpensesContextValue = {
@@ -31,29 +30,27 @@ type ExpensesContextValue = {
 const ExpensesContext = createContext<ExpensesContextValue | null>(null);
 
 export function ExpensesProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
-  const queryKey = ['ember-expenses', user?.id];
+  const queryKey = ['ember-local-expenses'];
   const query = useQuery({
     queryKey,
-    queryFn: listExpenses,
-    enabled: Boolean(user),
+    queryFn: listLocalExpenses,
   });
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey });
 
   const addMutation = useMutation({
-    mutationFn: createExpense,
+    mutationFn: createLocalExpense,
     onSuccess: invalidate,
   });
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ExpenseInput> }) =>
-      updateExpense(id, data),
+      updateLocalExpense(id, data),
     onSuccess: invalidate,
   });
   const deleteMutation = useMutation({
-    mutationFn: deleteExpense,
+    mutationFn: deleteLocalExpense,
     onSuccess: invalidate,
   });
 
@@ -78,7 +75,7 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
       await deleteMutation.mutateAsync(id);
       return null;
     } catch (error) {
-      return error instanceof Error ? error.message : 'No se pudo cancelar el gasto';
+      return error instanceof Error ? error.message : 'No se pudo eliminar la suscripción';
     }
   };
 

@@ -19,7 +19,6 @@ import {
 } from '@expo-google-fonts/outfit';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -60,13 +59,11 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <AuthProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <KeyboardProvider>
-                  <RootLayoutNav />
-                </KeyboardProvider>
-              </GestureHandlerRootView>
-            </AuthProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <KeyboardProvider>
+                <RootLayoutNav />
+              </KeyboardProvider>
+            </GestureHandlerRootView>
           </ThemeProvider>
         </QueryClientProvider>
       </ErrorBoundary>

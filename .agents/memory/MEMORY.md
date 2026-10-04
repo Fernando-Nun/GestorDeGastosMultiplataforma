@@ -1,2 +1,3 @@
 - [Ember API migration compatibility](ember-api-compatibility.md) — preserve the existing cookie-based client behavior when changing API integration.
+- [Ember mobile local data](ember-mobile-local-data.md) — iPhone records start empty, stay on-device, and must not silently sync with Ember’s API.
 - [Expo workspace quirks](expo-workspace-quirks.md) — mobile Expo artifact uses a non-root preview path; this template rejects app.json splash config.
