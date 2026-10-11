@@ -34,4 +34,5 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Compilar Archivo .IPA (Preview)
+        working-directory: artifacts/ember-mobile
         run: pnpm dlx eas-cli build --profile preview --platform ios --non-interactive
