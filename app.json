@@ -8,7 +8,10 @@
       }
     },
     "ios": {
-      "bundleIdentifier": "com.fernandonunez.gestorgastos"
-    }
+  "bundleIdentifier": "com.fernandonunez.gestorgastos",
+  "infoPlist": {
+    "ITSAppUsesNonExemptEncryption": false
+  }
+}
   }
 }
