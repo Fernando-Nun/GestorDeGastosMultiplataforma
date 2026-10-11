@@ -1,0 +1,37 @@
+name: Generar IPA con EAS
+
+on:
+  push:
+    branches:
+      - main # Cambia esto si tu rama principal se llama 'master'
+
+jobs:
+  build:
+    name: Compilar para iPhone
+    runs-on: ubuntu-latest # Usamos Linux porque EAS procesa la nube desde ahí
+
+    steps:
+      - name: 🏗️ Clonar Repositorio
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node.js
+        uses: actions/checkout@v4
+        with:
+          node-version: 18
+
+      - name: 📦 Instalar PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9 # Ajusta a tu versión local de pnpm
+
+      - name: 📥 Instalar Dependencias
+        run: pnpm install --ignore-scripts
+
+      - name: 🚀 Configurar EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Compilar Archivo .IPA (Preview)
+        run: pnpm dlx eas-cli build --profile preview --platform ios --non-interactive
