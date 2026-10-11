@@ -25,7 +25,7 @@ jobs:
           version: 9 # Ajusta a tu versión local de pnpm
 
       - name: 📥 Instalar Dependencias
-        run: pnpm install --ignore-scripts
+        run: pnpm install --ignore-scripts --no-frozen-lockfile
 
       - name: 🚀 Configurar EAS CLI
         uses: expo/expo-github-action@v8
