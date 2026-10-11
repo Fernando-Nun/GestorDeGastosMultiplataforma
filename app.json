@@ -1,9 +1,14 @@
 {
   "expo": {
+    "name": "Gestor de Gastos",
+    "slug": "workspace", 
     "extra": {
       "eas": {
         "projectId": "1857cd52-1950-4360-970e-7c2640330513"
       }
+    },
+    "ios": {
+      "bundleIdentifier": "com.fernandonunez.gestorgastos"
     }
   }
 }
